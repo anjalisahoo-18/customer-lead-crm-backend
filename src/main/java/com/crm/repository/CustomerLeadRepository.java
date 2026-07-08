@@ -4,6 +4,7 @@ import com.crm.model.CustomerLead;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface CustomerLeadRepository extends JpaRepository<CustomerLead, Long> {
+public interface CustomerLeadRepository extends JpaRepository<CustomerLead, Long>, JpaSpecificationExecutor<CustomerLead> {
     
     @Query("SELECT c FROM CustomerLead c WHERE " +
            "(:leadTypeId IS NULL OR c.leadType.id = :leadTypeId) AND " +

@@ -10,6 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -105,17 +108,60 @@ public class CustomerLeadService {
         }
     }
 
+    private Specification<CustomerLead> createSpecification(
+            Long leadTypeId, String status, String priority, String city,
+            LocalDate startDate, LocalDate endDate, String customerName, String mobile,
+            String search) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (leadTypeId != null) {
+                predicates.add(cb.equal(root.get("leadType").get("id"), leadTypeId));
+            }
+            if (status != null && !status.isEmpty()) {
+                predicates.add(cb.equal(cb.lower(root.get("status")), status.toLowerCase()));
+            }
+            if (priority != null && !priority.isEmpty()) {
+                predicates.add(cb.equal(cb.lower(root.get("priority")), priority.toLowerCase()));
+            }
+            if (city != null && !city.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("city")), "%" + city.toLowerCase() + "%"));
+            }
+            if (startDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate"), startDate.atStartOfDay()));
+            }
+            if (endDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdDate"), endDate.atTime(LocalTime.MAX)));
+            }
+            if (customerName != null && !customerName.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("customerName")), "%" + customerName.toLowerCase() + "%"));
+            }
+            if (mobile != null && !mobile.isEmpty()) {
+                predicates.add(cb.like(root.get("mobile"), "%" + mobile + "%"));
+            }
+            if (search != null && !search.isEmpty()) {
+                String searchPattern = "%" + search.toLowerCase() + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("customerName")), searchPattern),
+                    cb.like(root.get("mobile"), searchPattern),
+                    cb.like(cb.lower(root.get("email")), searchPattern),
+                    cb.like(cb.lower(root.get("city")), searchPattern)
+                ));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
     public Page<CustomerLead> getFilteredLeads(
             Long leadTypeId, String status, String priority, String city,
             LocalDate startDate, LocalDate endDate, String customerName, String mobile,
             String search, Pageable pageable) {
         
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
-
-        return leadRepository.filterLeads(
-                leadTypeId, status, priority, city, startDateTime, endDateTime, customerName, mobile, search, pageable
+        Specification<CustomerLead> spec = createSpecification(
+                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search
         );
+        return leadRepository.findAll(spec, pageable);
     }
 
     public List<CustomerLead> getFilteredLeadsList(
@@ -123,12 +169,10 @@ public class CustomerLeadService {
             LocalDate startDate, LocalDate endDate, String customerName, String mobile,
             String search) {
         
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
-
-        return leadRepository.filterLeadsList(
-                leadTypeId, status, priority, city, startDateTime, endDateTime, customerName, mobile, search
+        Specification<CustomerLead> spec = createSpecification(
+                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search
         );
+        return leadRepository.findAll(spec);
     }
 
     public List<CustomerLead> getAllLeads() {
