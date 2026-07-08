@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Long> {
     List<Note> findByCustomerLeadIdOrderByCreatedDateDesc(Long customerLeadId);
+    void deleteByCustomerLeadId(Long customerLeadId);
 }

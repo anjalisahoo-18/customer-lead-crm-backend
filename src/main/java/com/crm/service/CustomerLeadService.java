@@ -5,6 +5,9 @@ import com.crm.model.LeadType;
 import com.crm.repository.CustomerLeadRepository;
 import com.crm.repository.LeadTypeRepository;
 import com.crm.exception.ResourceNotFoundException;
+import com.crm.repository.FollowUpRepository;
+import com.crm.repository.NoteRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +29,12 @@ public class CustomerLeadService {
 
     @Autowired
     private LeadTypeRepository leadTypeRepository;
+
+    @Autowired
+    private FollowUpRepository followupRepository;
+
+    @Autowired
+    private NoteRepository noteRepository;
 
     @jakarta.annotation.PostConstruct
     public void seedInitialLeads() {
@@ -226,8 +235,11 @@ public class CustomerLeadService {
         return leadRepository.save(lead);
     }
 
+    @Transactional
     public void deleteLead(Long id) {
         CustomerLead lead = getLeadById(id);
+        followupRepository.deleteByCustomerLeadId(id);
+        noteRepository.deleteByCustomerLeadId(id);
         leadRepository.delete(lead);
     }
 

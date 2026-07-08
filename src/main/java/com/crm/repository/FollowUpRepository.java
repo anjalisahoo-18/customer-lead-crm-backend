@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface FollowUpRepository extends JpaRepository<FollowUp, Long> {
     List<FollowUp> findByCustomerLeadIdOrderByFollowupDateDesc(Long customerLeadId);
+    void deleteByCustomerLeadId(Long customerLeadId);
 }
