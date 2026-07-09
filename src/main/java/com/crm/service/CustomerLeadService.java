@@ -120,7 +120,7 @@ public class CustomerLeadService {
     private Specification<CustomerLead> createSpecification(
             Long leadTypeId, String status, String priority, String city,
             LocalDate startDate, LocalDate endDate, String customerName, String mobile,
-            String search) {
+            String search, String assignedExecutive) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -148,6 +148,9 @@ public class CustomerLeadService {
             if (mobile != null && !mobile.isEmpty()) {
                 predicates.add(cb.like(root.get("mobile"), "%" + mobile + "%"));
             }
+            if (assignedExecutive != null && !assignedExecutive.isEmpty()) {
+                predicates.add(cb.equal(root.get("assignedExecutive"), assignedExecutive));
+            }
             if (search != null && !search.isEmpty()) {
                 String searchPattern = "%" + search.toLowerCase() + "%";
                 predicates.add(cb.or(
@@ -165,10 +168,10 @@ public class CustomerLeadService {
     public Page<CustomerLead> getFilteredLeads(
             Long leadTypeId, String status, String priority, String city,
             LocalDate startDate, LocalDate endDate, String customerName, String mobile,
-            String search, Pageable pageable) {
+            String search, String assignedExecutive, Pageable pageable) {
         
         Specification<CustomerLead> spec = createSpecification(
-                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search
+                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search, assignedExecutive
         );
         return leadRepository.findAll(spec, pageable);
     }
@@ -176,10 +179,10 @@ public class CustomerLeadService {
     public List<CustomerLead> getFilteredLeadsList(
             Long leadTypeId, String status, String priority, String city,
             LocalDate startDate, LocalDate endDate, String customerName, String mobile,
-            String search) {
+            String search, String assignedExecutive) {
         
         Specification<CustomerLead> spec = createSpecification(
-                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search
+                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search, assignedExecutive
         );
         return leadRepository.findAll(spec);
     }

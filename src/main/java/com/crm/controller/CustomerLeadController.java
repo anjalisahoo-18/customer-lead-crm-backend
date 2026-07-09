@@ -66,6 +66,7 @@ public class CustomerLeadController {
             @RequestParam(required = false) String customerName,
             @RequestParam(required = false) String mobile,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String assignedExecutive,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdDate,desc") String[] sort) {
@@ -82,7 +83,7 @@ public class CustomerLeadController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
         return ResponseEntity.ok(leadService.getFilteredLeads(
-                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search, pageable
+                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search, assignedExecutive, pageable
         ));
     }
 
@@ -125,10 +126,11 @@ public class CustomerLeadController {
             @RequestParam(required = false) String customerName,
             @RequestParam(required = false) String mobile,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String assignedExecutive,
             HttpServletResponse response) throws IOException {
 
         List<CustomerLead> leads = leadService.getFilteredLeadsList(
-                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search
+                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search, assignedExecutive
         );
 
         Workbook workbook = new XSSFWorkbook();
@@ -193,10 +195,11 @@ public class CustomerLeadController {
             @RequestParam(required = false) String customerName,
             @RequestParam(required = false) String mobile,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String assignedExecutive,
             HttpServletResponse response) throws IOException {
 
         List<CustomerLead> leads = leadService.getFilteredLeadsList(
-                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search
+                leadTypeId, status, priority, city, startDate, endDate, customerName, mobile, search, assignedExecutive
         );
 
         response.setContentType("application/pdf");
